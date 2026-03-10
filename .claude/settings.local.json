@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(claude-developer-platform)",
+      "Skill(claude-developer-platform:*)",
+      "Bash(npm install)",
+      "Bash(git init)",
+      "Bash(git -C /Users/rayanmukherjee/Desktop/Codes/Tomo add .)",
+      "Bash(git -C:*)",
+      "Bash(git config --global user.email \"rayan.m.rich@gmail.com\")",
+      "Bash(git config --global user.name \"raymukh\")"
+    ]
+  }
+}
