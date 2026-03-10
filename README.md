@@ -8,7 +8,7 @@ AI accountability coach that messages you via Telegram. Talks like a real friend
 2. Go to [railway.app](https://railway.app), click **New Project**, select **Deploy from GitHub repo**, and pick your fork
 3. Add these environment variables in the Railway dashboard:
    - `TELEGRAM_BOT_TOKEN` — get one from [@BotFather](https://t.me/BotFather) on Telegram
-   - `ANTHROPIC_API_KEY` — get one from [console.anthropic.com](https://console.anthropic.com)
+   - `GEMINI_API_KEY` — get one from [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
    - `CHECKIN_MORNING_CRON` — (optional) morning check-in schedule, default `0 8 * * *`
    - `CHECKIN_EVENING_CRON` — (optional) evening check-in schedule, default `0 20 * * *`
 4. That's it. Polling mode means no webhook setup needed

@@ -7,14 +7,14 @@ const { chat, generateCheckIn, getActiveChatIds } = require("./tomo");
 
 // --- Validate required env vars ---
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 if (!TELEGRAM_BOT_TOKEN) {
   console.error("TELEGRAM_BOT_TOKEN is not set. Exiting.");
   process.exit(1);
 }
-if (!ANTHROPIC_API_KEY) {
-  console.error("ANTHROPIC_API_KEY is not set. Exiting.");
+if (!GEMINI_API_KEY) {
+  console.error("GEMINI_API_KEY is not set. Exiting.");
   process.exit(1);
 }
 

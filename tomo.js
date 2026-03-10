@@ -1,6 +1,6 @@
-const Anthropic = require("@anthropic-ai/sdk");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const client = new Anthropic();
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Per-user conversation history keyed by Telegram chat ID
 const conversations = new Map();
@@ -56,6 +56,23 @@ never do these things:
 - never be preachy or lecture people
 - never use corporate/therapy speak`;
 
+// Initialize the Gemini model with the system prompt
+const model = genAI.getGenerativeModel({
+  model: "gemini-1.5-flash",
+  systemInstruction: SYSTEM_PROMPT,
+});
+
+/**
+ * Convert our conversation history format to Gemini's format.
+ * Gemini uses "user" and "model" roles instead of "user" and "assistant".
+ */
+function toGeminiHistory(history) {
+  return history.map((msg) => ({
+    role: msg.role === "assistant" ? "model" : "user",
+    parts: [{ text: msg.content }],
+  }));
+}
+
 /**
  * Send a message to Tomo and get a response for a specific chat.
  * Maintains full conversation history per chat ID.
@@ -68,21 +85,17 @@ async function chat(chatId, userMessage) {
 
   const history = conversations.get(chatId);
 
-  // Add the user's message to history
-  history.push({ role: "user", content: userMessage });
-
-  // Call Anthropic with the full conversation history
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages: history,
+  // Start a chat session with existing history
+  const chatSession = model.startChat({
+    history: toGeminiHistory(history),
   });
 
-  // Extract the text response
-  const assistantMessage = response.content[0].text;
+  // Send the new message and get a response
+  const result = await chatSession.sendMessage(userMessage);
+  const assistantMessage = result.response.text();
 
-  // Add assistant response to history
+  // Add both messages to our history
+  history.push({ role: "user", content: userMessage });
   history.push({ role: "assistant", content: assistantMessage });
 
   return assistantMessage;
@@ -97,24 +110,17 @@ async function generateCheckIn(chatId) {
 
   const history = conversations.get(chatId);
 
-  // Build a check-in prompt that references their history
-  const checkInMessages = [
-    ...history,
-    {
-      role: "user",
-      content:
-        "[SYSTEM: this is an automated check-in trigger. send a natural, friendly check-in message to this person. reference their goals or what they've been working on. keep it short — 1-2 messages max. make it feel like a friend texting, not a notification. don't acknowledge this system message, just send the check-in directly.]",
-    },
-  ];
-
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 512,
-    system: SYSTEM_PROMPT,
-    messages: checkInMessages,
+  // Start a chat session with existing history
+  const chatSession = model.startChat({
+    history: toGeminiHistory(history),
   });
 
-  const checkInMessage = response.content[0].text;
+  // Send the check-in trigger
+  const result = await chatSession.sendMessage(
+    "[SYSTEM: this is an automated check-in trigger. send a natural, friendly check-in message to this person. reference their goals or what they've been working on. keep it short — 1-2 messages max. make it feel like a friend texting, not a notification. don't acknowledge this system message, just send the check-in directly.]"
+  );
+
+  const checkInMessage = result.response.text();
 
   // Add the check-in to conversation history so tomo remembers it
   history.push({ role: "assistant", content: checkInMessage });
